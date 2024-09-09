@@ -1,102 +1,157 @@
-fn main() {
-    let notas:[f32;4] = [6.7; 4];
-    let inteiro:usize =  0;
+const PI:f32 = 3.14;
+static mut VARIAVEL_GLOBAL:u8 = 1;
 
-    println!("{}", notas[inteiro]);
-
-    for indice in 0..notas.len() {
-        println!("A nota {} é = {}", indice + 1, notas[indice]);
-    }
-
-    matriz();
-    println!("É fim de semana? {}", eh_fim_de_semana(DiaDaSemana::Quarta));
-
-    //let dia: DiaDaSemana = DiaDaSemana::Sexta;
-
-    cores();
-    conteudo_opcional();
-    vectors();
-
-}
-
-#[allow(dead_code)]
-enum DiaDaSemana {
-    Domingo,
-    Segunda,
-    Terca,
-    Quarta,
-    Quinta,
-    Sexta,
-    Sabado,
-}
-
-fn eh_fim_de_semana(dia_da_semana:DiaDaSemana) -> bool 
+fn soma(a:i32, b:i32) -> i32
 {
-    match dia_da_semana
+    println!("{} + {} = {}", a, b, a + b);
+    a + b
+}
+
+fn sombra(){
+    let a = 123;
+
     {
-        DiaDaSemana::Domingo | DiaDaSemana::Sabado => true,
-        _ => false
+        let b = 456;
+        println!("Dentro, b = {}", b);
+        
+        let a = 777;
+        println!("Dentro, a = {}", a);        
     }
+
+    println!("Fora, a = {}", a);
 }
 
-fn matriz(){
+fn escopo(){
+    println!("PI = {}", PI);
 
-    let matriz:[[f32; 3]; 2] = [
-        [0.0, 1.2, 0.1],
-        [1.3, 0.3, 1.4]
-    ];
+    unsafe{
+    println!("variavel_global = {}", VARIAVEL_GLOBAL);
+    }   
+    let variavel:i32 = 300;
+    println!("variavel = {}, tamanho = {} bytes", variavel, std::mem::size_of_val(&variavel));
 
-    for linha in matriz {
-        for item in linha {
-            println!("Item = {}", item);
-        }
+    let decimal:f32 = 2.5;
+    println!("decimal = {}",decimal);
+
+    let booleana = false;
+    //booleana = true;
+    println!("Booleana = {}, Tamanho booleana = {}", booleana, std::mem::size_of_val(&booleana));
+
+    let letra:char = 'C';
+    println!("Tamanho do char = {}", std::mem::size_of_val(&letra));
+}
+
+fn main(){
+    escopo();
+    sombra();
+    println!("Soma = {}", soma(2,2));
+
+   condicionais();
+   repeticoes();
+
+   ownership();
+
+   pattern_matching();
+   erros();
+
+}
+
+fn condicionais(){
+
+    let idade:u8 = 17;
+    let responsavel_autorizou = true;
+    let e_maior = idade >= 18;
+
+    if e_maior {
+        println!("Pode entrar na balada");
+    } else if idade > 16 && responsavel_autorizou{
+        println!("Pode entrar com assinatura do responsável");
+    } else {
+        println!("Não pode entrar na balada");
     }
-}
 
-#[allow(dead_code)]
-enum Color {
-    Red,
-    Green,
-    Blue,
-    RgbColor(u8, u8, u8),
-    Cmyk{cyan:u8, magenta:u8, yellow:u8, black:u8 }
-}
+    let condicao = if e_maior { "maior" } else { "menor" };
 
-fn cores(){
-    let cor = Color::Cmyk{cyan: 100, magenta: 50, yellow: 70,  black: 255};//Color::RgbColor(0,01,0);
-    println!("Cor = {}", match cor{
-        Color::Red => "vermelho",
-        Color::Green => "verde",
-        Color::Blue => "azul",
-        Color::RgbColor(0, 0, 0) | Color::Cmyk{cyan:_, magenta:_, yellow:_, black:255}  => "preta",
-        Color::RgbColor(_, _, _) => "RGB desconhecido",
-        Color::Cmyk{cyan:_, magenta:_, yellow:_, black:_} => "CMYK desconhecida"
-    })
-}
+    println!("É {} de idade", condicao);
 
-fn conteudo_opcional(){
-    let conteudo_arquivo = ler_arquivo(String::from(""));
-    match &conteudo_arquivo {
-        Some(valor) => println!("{}", valor),
-        None => println!("Arquivo nao existe")
+    let linguagem = "PHP";
+    let proposito = match linguagem {
+        "PHP" => "Web",
+        "Kotlin" => "Android",
+        "Python" => "Data Science",
+        _ => "Desconhecido"
     };
 
-    println!("{:?}", &conteudo_arquivo);
- 
-    if let Some(valor) = conteudo_arquivo {
-        println!("Agora tenho certeza de que ha o valor {}", valor);
+    println!("O proposito de {} é {}", linguagem, proposito);
+
+}
+
+fn repeticoes(){
+
+    let multiplicador:u8 = 5;
+
+    let mut contador:u8 = 0;
+
+    while contador <10 {
+    contador += 1;
+    if contador == 5 {
+        continue
+    }
+
+    println!("{} x {} = {}", multiplicador, contador, multiplicador * contador);
+    
+    }
+
+    contador = 0;
+    loop {
+        contador +=1;
+
+        println!("{} x {} = {}", multiplicador, contador, multiplicador * contador);
+
+        if contador == 10{
+            break;
+        }   
+    }
+    
+    for i in 1..=10 {//for i in 1..11
+        println!("{} x {} = {}", multiplicador, i, multiplicador * i);
     }
 }
 
-fn ler_arquivo(caminho_arquivo: String) -> Option<String> {
-    Some(String::from("Conteudo do arquivo"))
+fn ownership(){
+
+    let mut uma_string = String::from("Vinicius");
+    rouba(&mut uma_string);
+    println!("{}",uma_string);
+
 }
 
-fn vectors(){
-    let mut notas:Vec<f32> = Vec::new(); //vec![10.0, 8.8, 6.5];
-    notas.push(10.0);
-    notas.push(8.8);
-    notas.push(6.5);
+fn rouba(string: &mut String){
+    string.push_str(" Dias");
+    println!("{}", string)
+}
 
-    println!("{:?}", notas);
+fn pattern_matching(){
+    for x in 1..=20{
+        println!("{} : {}", x, match x{
+            1 => "Pouco",
+            2 | 3 => "Um pouquinho",
+            4..=10 => "Um bocado",
+            _ if x % 2 == 0 => "Uma boa quantidade",
+            _ => "Muito"
+        });
+    }
+}
+
+fn erros(){
+   // panic!("Erro Proposital");
+    match resultado(){
+        Ok(s) => println!("String de sucesso = {}", s),
+        Err(numero) => println!("Codigo de erro = {}", numero)
+    };
+}
+
+fn resultado() -> Result<String, u8>{
+    //Ok(String::from("Tudo de certo"))
+    Err(42)
 }
